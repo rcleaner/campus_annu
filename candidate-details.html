@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Candidate Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #41516b);
+            color: white;
+            margin: 0;
+            padding: 30px;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            background: rgba(85, 85, 88, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 900px;
+            margin: auto;
+        }
+        .left, .right {
+            padding: 20px;
+            background: #162447;
+            border-radius: 10px;
+            width: 50%;
+        }
+        .left img {
+            width: 180px;
+            height: 150px;
+            border-radius: 50%;
+        }
+        .vote-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .vote-btn:hover {
+            background: rgb(199, 87, 87);
+        }
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 3rem;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+
+
+
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 1.1rem;
+        }
+
+
+        .navbar .nav-links a:hover {
+            color: #a8dadc;
+        }
+    </style>
+    <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+    
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbXNEje3_zNs63ydslxfVx1FKt3S786B4",
+      authDomain: "main-27d80.firebaseapp.com",
+      databaseURL: "https://main-27d80-default-rtdb.firebaseio.com",
+      projectId: "main-27d80",
+      storageBucket: "main-27d80.appspot.com",
+      messagingSenderId: "1001747344110",
+      appId: "1:1001747344110:web:de9f44c0d7159875e0e1ff"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    
+    // Function to fetch candidate details
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    
+    const candidateId = getQueryParam("id");
+    
+    if (candidateId) {
+      const candidateRef = ref(db, `candidates/${candidateId}`);
+      get(candidateRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const candidate = snapshot.val();
+    
+          document.getElementById("candidate-info").innerHTML = `
+            <div class="container">
+              <div class="left">
+                <img src="${candidate.img || 'default-profile.png'}" alt="${candidate.candidateName}">
+                <h2>${candidate.candidateName}</h2>
+                <p><strong>Department:</strong> ${candidate.department}</p>
+                <p><strong>Year:</strong> ${candidate.year}</p>
+              </div>
+              <div class="right">
+                <h3>Position: ${candidate.position}</h3>
+                <p><strong>Panel:</strong> ${candidate.panel}</p>
+                <h4>Promises:</h4>
+                <ul>
+                  ${candidate.promises.split(';').map(promise => `<li>${promise}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          `;
+        } else {
+          document.getElementById("candidate-info").innerHTML = "<h2>Candidate not found!</h2>";
+        }
+      }).catch((error) => {
+        console.error("Error fetching candidate data:", error);
+      });
+    } else {
+      document.getElementById("candidate-info").innerHTML = "<h2>No Candidate ID Provided!</h2>";
+    }
+</script>    
+</head>
+<body>
+  <div class="navbar">
+    <div class="nav-links">
+        <a href=" index.html">HOME</a>
+        <a href="dashboard.html">VOTE</a>
+        <a href="adminlogin.html">ADMIN</a>
+        <a href="result.html">RESULT</a>
+        <a href="about.html">ABOUT US</a>
+    </div>
+</div>
+    <h1>Candidate Details</h1>
+    <div id="candidate-info"></div>
+    <button class="vote-btn" onclick="window.location.href='vote.html'">Vote Now</button>
+</body>
+</html>

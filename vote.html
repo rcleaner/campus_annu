@@ -1,0 +1,404 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Election Voting</title>
+    <style>
+            * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #41516b);
+
+
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+
+        /* Voter Details - Fixed width on the left */
+    .voter-details {
+        width: 320px; /* Fixed width to keep it on the left */
+        flex-shrink: 0; /* Prevents it from resizing */
+    }
+
+    /* Voting Section - Takes remaining space on the right */
+    .voting-section {
+        flex-grow: 1; /* Expands to fill remaining space */
+    }
+
+    .voter-box {
+        background: #f8f9fa;
+        color: #333;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+        margin: 10px 0;
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .voter-box span {
+        float: right;
+        font-weight: normal;
+    }
+    .voter-details div{
+        background-color: #d5e1ee;
+    }
+
+        .section {
+            flex: 1;
+            min-width: 300px;
+            background: #ffffff;
+            color: #333;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+
+        h2 {
+            color: #1e3c72;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+
+        #vote-message {
+            color: red;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+
+        .post-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+
+        .post-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+
+        .post-section li {
+            background: #f0f0f5;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+
+        button {
+            padding: 10px 18px;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+
+        button:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #302b69, #082857);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 3rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            position: relative;
+            top: -20px;
+           
+        }
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            text-align: center;
+        }
+
+
+        .navbar .nav-links a:hover {
+            color: #a8dadc;
+        }
+        .r{
+            color:rgb(131, 10, 10);
+            font-size: 1.3em;
+            font-style: italic;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .th{
+            font-size:1.5em;
+            padding-top: 800px;
+            color: #383b3f;
+            text-align:center ;
+            margin-top: 10px;
+           
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbXNEje3_zNs63ydslxfVx1FKt3S786B4",
+            authDomain: "main-27d80.firebaseapp.com",
+            databaseURL: "https://main-27d80-default-rtdb.firebaseio.com",
+            projectId: "main-27d80",
+            storageBucket: "main-27d80.appspot.com",
+            messagingSenderId: "1001747344110",
+            appId: "1:1001747344110:web:de9f44c0d7159875e0e1ff"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const voter = JSON.parse(localStorage.getItem("loggedInUser")) || { id: 'Unknown', name: 'Guest' };
+
+
+            document.getElementById("voter-id").textContent = voter.id;
+            document.getElementById("voter-name").textContent = voter.name;
+
+
+            const voteMessage = document.getElementById("vote-message");
+            const today = new Date().toISOString().split("T")[0];
+
+
+            // ✅ Fetch voting date
+            const voteDateRef = ref(db, "settings/votingDate");
+            const voteDateSnapshot = await get(voteDateRef);
+
+
+            if (!voteDateSnapshot.exists()) {
+                voteMessage.textContent = "⚠️ Voting date is not set by the admin.";
+                return;
+            }
+
+
+            const votingDate = voteDateSnapshot.val();
+            if (today !== votingDate) {
+                voteMessage.textContent = `⚠️ Voting is only allowed on ${votingDate}. Please come back on that date.`;
+                return;
+            }
+
+                   // Fetch Voting Status
+                   const votesRef = ref(db, `votes/${voter.id}`);
+            const votesSnapshot = await get(votesRef);
+            const votesCast = votesSnapshot.exists() ? Object.keys(votesSnapshot.val()).length : 0;
+
+            document.getElementById("votes-cast").textContent = votesCast;
+            document.getElementById("voting-status").textContent = votesCast > 0 ? "Completed" : "Pending";
+
+           
+           // Voting Countdown Timer
+           function updateCountdown() {
+            const now = new Date();
+            const endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999); // Set to 11:59:59 PM
+
+            const timeLeft = endOfDay - now;
+
+            if (timeLeft <= 0) {
+                document.getElementById("vote-timer").textContent = "Voting closed";
+                return;
+            }
+
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById("vote-timer").textContent = `${hours}h ${minutes}m ${seconds}s left`;
+        }
+
+        // Update countdown every second
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+            ////////////////////////////////////////////////
+
+            // ✅ Fetch candidates
+            const candidatesRef = ref(db, "candidates");
+            const snapshot = await get(candidatesRef);
+
+
+            // Fixed category order
+            const orderedPositions = [
+                "Chairperson",
+                "Vice Chairperson",
+                "Secretary",
+                "Sports Secretary",
+                "Cultural Secretary"
+            ];
+
+
+            const candidatesByPosition = {};
+            if (snapshot.exists()) {
+                const candidatesData = snapshot.val();
+                Object.values(candidatesData).forEach(candidate => {
+                    if (!candidatesByPosition[candidate.position]) {
+                        candidatesByPosition[candidate.position] = [];
+                    }
+                    candidatesByPosition[candidate.position].push(candidate);
+                });
+            }
+
+
+            const postsContainer = document.getElementById("posts-container");
+            postsContainer.innerHTML = "";
+
+
+            // ✅ Display positions in fixed order
+            orderedPositions.forEach(async (position) => {
+                const postSection = document.createElement("div");
+                postSection.className = "post-section";
+                postSection.innerHTML = `<h2>${position}</h2><ul id="candidates-${position.replace(/\s+/g, '')}"></ul>`;
+                postsContainer.appendChild(postSection);
+
+
+                const candidateList = document.getElementById(`candidates-${position.replace(/\s+/g, '')}`);
+
+
+                if (!candidatesByPosition[position] || candidatesByPosition[position].length === 0) {
+                    candidateList.innerHTML = `<li>No candidates available</li>`;
+                    return;
+                }
+
+
+                const voteRef = ref(db, `votes/${voter.id}/${position}`);
+                const voteSnapshot = await get(voteRef);
+                const hasVoted = voteSnapshot.exists();
+
+
+                candidatesByPosition[position].forEach(candidate => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        ${candidate.candidateName}
+                        <button id="vote-button-${candidate.id}" ${hasVoted ? 'disabled' : ''}>Vote</button>
+                    `;
+                    candidateList.appendChild(li);
+
+
+                    document.getElementById(`vote-button-${candidate.id}`).addEventListener("click", async () => {
+                        if (!hasVoted) {
+                            await set(ref(db, `votes/${voter.id}/${position}`), {
+                                candidateId: candidate.id,
+                                candidateName: candidate.candidateName
+                            });
+
+
+                            alert(`✅ You voted for ${candidate.candidateName} in ${position}`);
+                            document.querySelectorAll(`#candidates-${position.replace(/\s+/g, '')} button`).forEach(btn => {
+                                btn.disabled = true;
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="index.html" class="link">HOME</a>
+            <a href="adminlogin.html" class="link">ADMIN</a>
+            <a href="login.html" class="link">VOTE</a>
+            <a href="result.html" class="link">RESULT</a>
+            <a href="about.html" class="link">ABOUT US</a>
+        </div>
+    </div>
+        <div class="container">
+        
+            <div class="section voter-details">
+
+                <h2>Voter Details</h2>
+                
+                <div class="voter-box">
+                    <p><strong>ID:</strong> <span id="voter-id">Loading...</span></p>
+                </div>
+            
+                <div class="voter-box">
+                    <p><strong>Name:</strong> <span id="voter-name">Loading...</span></p>
+                </div>
+            
+                <div class="voter-box">
+                    <p><strong>Voting Status:</strong> <span id="voting-status">Checking...</span></p>
+                </div>
+            
+                <div class="voter-box">
+                    <p><strong>Time Left to Vote:</strong> <span id="vote-timer">Calculating...</span></p>
+                </div>
+            
+                <div class="voter-box">
+                    <p><strong>Total Votes Cast:</strong> <span id="votes-cast">0</span></p>
+                </div>
+            
+                <div class="voter-box">
+                    <p><strong>Election Rules:</strong> </p>
+                    <div class="r">
+                    <p>* One vote per position. <br>  Voting is final once submitted...</p>
+                    <p>* Be wise to select each leader!!!!!</p>
+                    </div>
+                </div>
+                <P class="th"><br><br><br><br>THANK YOU FOR VOTING</P>
+            </div>
+            
+                <!-- Voting Section on Right -->
+            <div id="posts-container" class="section voting-section">
+                <h2>Vote for Candidates</h2>
+                <p id="vote-message"></p>
+            </div>
+             </div>
+        </div>
+        
+        </body>
+        </html>
+        
+

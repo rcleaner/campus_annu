@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <style>
+        /* Background Image */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+           /* background: url('https://www.bing.com/images/search?view=detailV2&ccid=Gx6jMLoY&id=36C43B16612370D9722C6E0385B3016A6A9750A4&thid=OIP.Gx6jMLoYxYXnf0QVuctWdQHaE8&mediaurl=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F010%2F942%2F363%2Foriginal%2Fvote-voting-and-election-concept-on-virtual-screen-polling-ballot-online-elections-electronic-voting-technology-e-ballot-check-mark-closeup-finger-about-to-press-a-button-illustration-vector.jpg&exph=1280&expw=1920&q=image+of+online+voting&simid=607997761914884054&form=IRPRST&ck=E0AB9C523417D3959888A724D33B1B9B&selectedindex=5&itb=0&cw=1375&ch=664&ajaxhist=0&ajaxserp=0&vt=0&sim=11') no-repeat center center fixed; */
+            background-size: cover;
+            color: black;
+            text-align: center;
+            background-color: white;
+        }
+        .image-section {
+            width: 30%;
+            height: 500px;
+            background: url('https://media.istockphoto.com/vectors/male-politician-urges-to-vote-online-woman-voting-on-mobile-phone-vector-id1394911916?k=20&m=1394911916&s=612x612&w=0&h=5c-tYw359UW5JhyOWROYWSGNDe1G21XCDu-G7X6zXCU=') no-repeat center center;
+            background-size: cover;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            background: #1e3c72;
+            transform: scale(1.1);
+        }
+
+        .top-container {
+            margin-top: 50px;
+            text-align: center;
+            left:165px;
+        }
+
+        /* Flip Slogan Section */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 20px;
+            position: absolute;
+            bottom: -268.5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            top: 1200px;
+        }
+        .top-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 10px;
+            position: relative;
+            top: -319px;
+            left: 500px;
+            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+        .flip-card {
+            width: 320px;
+            height: 220px;
+            perspective: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            padding-right: 4%;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .flip-card-front {
+            background: #1e3c72;
+            color: white;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .flip-card-back {
+            background: #3a4c6e;
+            transform: rotateY(180deg);
+            color: white;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+        /* News section */
+        .news-slider {
+            width: 90%;
+            max-width: 900px;
+            overflow: hidden;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        .news-list {
+            display: flex;
+            gap: 15px;
+            list-style: none;
+            padding: 0;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .news-card {
+            min-width: 250px;
+            max-width: 250px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            overflow: hidden;
+            background-color: #1e3c72;
+        }
+
+        .news-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .news-card a {
+            color: whitesmoke;
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            margin-top: 100px;
+        }
+
+        .news-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Online Election Messages */
+        .message-section {
+            top:20px;
+            margin: 40px auto;
+            max-width: 900px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 3rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            position: relative;
+            top: 0;
+            
+        }
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            text-align: center;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #a8dadc;
+        }
+        h1{
+            color: #2a5298;
+            font-size: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="index.html" class="link">HOME</a>
+            <a href="adminlogin.html" class="link">ADMIN</a>
+            <a href="login.html" class="link">VOTE</a>
+            <a href="result.html" class="link">RESULT</a>
+            <a href="about.html" class="link">ABOUT US</a>
+        </div>
+    </div>
+
+    <div class="image-section"></div>
+
+    <div class="top-container">
+        <h1>Your Voice, Your Power, Your Vote</h1>
+    </div>
+
+    
+
+    <!-- News Section -->
+    <div class="news-slider">
+        <ul id="news-list" class="news-list"></ul>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+
+
+
+
+
+
+
+    <!-- Flip Card Slogans -->
+    <div class="card-container">
+        <div class="flip-card">
+            <div class="flip-card-inner">
+                <div class="flip-card-front">
+                    <p class="quote">"Democracy is about voting and it’s about a majority vote."</p>
+                    <p class="author">-<br>Debbie Stabenow</p>
+                </div>
+                <div class="flip-card-back">
+                    <p class="quote">“By voting, we add our voice to the chorus that forms opinions.”</p>
+                    <p class="author">-<br>Jens Stoltenberg</p>
+                </div>
+            </div>
+        </div>
+   
+    <div class="flip-card">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <p class="quote">“It's not enough to just want change ... You have to go and make change by voting."</p>
+                <p class="author">-<br>Taylor Swift</p>
+            </div>
+            <div class="flip-card-back">
+                <p class="quote">"All of us may have been created equal. But we'll never be equal until we all vote."</p>
+                <p class="author">-<br>Leonardo DiCaprio</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flip-card">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <p class="quote">"Vote early and vote often."</p>
+                <p class="author">-<br>H. L. Mencken</p>
+            </div>
+            <div class="flip-card-back">
+                <p class="quote">"Bad officials are elected by good citizens who do not vote."</p>
+                <p class="author">-<br>George Jean Nathan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Election Messages 
+    <div class="message-section">
+        <h2>Why Choose Online Voting? 🖥️</h2>
+        <p>✔️ Secure and transparent election process.</p>
+        <p>✔️ Vote from anywhere with ease.</p>
+        <p>✔️ Eliminates physical ballot errors.</p>
+        <p>✔️ Quick and real-time result updates.</p>
+    </div>
+    -->
+
+    <script>
+        const text = "Your Voice, Your Power, Your Vote";
+        let index = 0;
+
+        function typeEffect() {
+            if (index < text.length) {
+                document.getElementById("typing").innerHTML += text.charAt(index);
+                index++;
+                setTimeout(typeEffect, 100);
+            }
+        }
+        window.onload = typeEffect;
+        async function fetchNews() {
+            const apiKey = "30bd41db64384ee1b1eaef49a7fb5184"; // Replace with your NewsAPI key
+            const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const newsList = document.getElementById("news-list");
+                newsList.innerHTML = ""; // Clear previous news
+
+                data.articles.forEach((article, index) => {
+                    if (index < 100) { 
+                        const li = document.createElement("li");
+                        li.className = "news-card";
+
+                        li.innerHTML = `
+                            <img src="${article.urlToImage || 'https://via.placeholder.com/250'}" alt="News Image">
+                            <a href="${article.url}" target="_blank">${article.title}</a>
+                        `;
+
+                        newsList.appendChild(li);
+                    }
+                });
+
+                startNewsScroll(); // Start scrolling after news loads
+            } catch (error) {
+                console.error("Error fetching news:", error);
+            }
+        }
+
+        function startNewsScroll() {
+            const newsList = document.getElementById("news-list");
+            let scrollAmount = 0;
+
+            setInterval(() => {
+                scrollAmount += 265;
+                if (scrollAmount >= newsList.scrollWidth) {
+                    scrollAmount = 0;
+                }
+                newsList.style.transform = `translateX(-${scrollAmount}px)`;
+            }, 3000);
+        }
+
+        fetchNews();
+    </script>
+</body>
+
+</html>

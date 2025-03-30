@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter List Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #3a4c6e);
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+
+        /* Header Styling */
+        header {
+            background: #18024d;
+            padding: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+       
+        nav {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            padding-right: 20px;
+        }
+       
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+       
+        nav a:hover {
+            background: #1e3c72;
+            transform: scale(1.1);
+        }
+
+
+        h2 {
+            color: #fff;
+            margin-top: 20px;
+        }
+
+
+        .container {
+            background: #b4acbc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgb(11, 11, 11);
+            width: 80%;
+            margin: auto;
+        }
+
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+
+
+        .remove-btn {
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #addVoterBtn{
+            background:red;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 3rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            position: relative;
+            top: 0;
+            
+        }
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            text-align: center;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #a8dadc;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="index.html" class="link">HOME</a>
+            <a href="adminlogin.html" class="link">ADMIN</a>
+            <a href="login.html" class="link">VOTE</a>
+            <a href="result.html" class="link">RESULT</a>
+            <a href="about.html" class="link">ABOUT US</a>
+        </div>
+    </div>
+    <h2>Voter List Management</h2>
+    <div class="container">
+        <input type="text" id="admissionId" placeholder="Enter Admission ID">
+        <input type="text" id="name" placeholder="Enter Name">
+        <input type="email" id="email" placeholder="Enter Email" >
+        <input type="tel" id="phone" placeholder="Enter Phone Number">
+        <input type="text" id="batch" placeholder="Enter Batch">
+        <input type="text" id="year" placeholder="Enter Year">
+        <input type="text" id="department" placeholder="Enter Department">
+        <button id="addVoterBtn">Add Voter</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Admission ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Batch</th>
+                    <th>Year</th>
+                    <th>Department</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="voterTable">
+                <!-- Voters will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+
+        // ✅ Firebase Configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+        import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbXNEje3_zNs63ydslxfVx1FKt3S786B4",
+            authDomain: "main-27d80.firebaseapp.com",
+            databaseURL: "https://main-27d80-default-rtdb.firebaseio.com",
+            projectId: "main-27d80",
+            storageBucket: "main-27d80.appspot.com",
+            messagingSenderId: "1001747344110",
+            appId: "1:1001747344110:web:de9f44c0d7159875e0e1ff"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        function isValidEmail(email) {
+            let emailRegex = /^[^\s@]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|in)$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidPhone(phone) {
+            let phoneRegex = /^[0-9]{10}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // ✅ Function to Insert Data
+        function InsertData() {
+            let admissionId = document.getElementById("admissionId").value.trim();
+            let name = document.getElementById("name").value.trim();
+            let email = document.getElementById("email").value.trim();
+            let phone = document.getElementById("phone").value.trim();
+            let batch = document.getElementById("batch").value.trim();
+            let year = document.getElementById("year").value.trim();
+            let department = document.getElementById("department").value.trim();
+
+            if (!admissionId || !name || !email || !phone || !batch || !year || !department) {
+                alert("❌ Please fill in all fields.");
+                return;
+            }
+            if (!isValidEmail(email)) {
+                alert("❌ Invalid email format. Please use a valid email with a proper domain.");
+                return;
+            }
+
+            if (!isValidPhone(phone)) {
+                alert("❌ Invalid phone number. It should be exactly 10 digits.");
+                return;
+            }
+
+
+            set(ref(db, "voters/" + admissionId), {
+                AdmissionNo: admissionId,
+                Name: name,
+                Email: email,
+                Phone: phone,
+                Batch: batch,
+                Year: year,
+                Department: department
+            })
+            .then(() => {
+                alert("✅ Voter added successfully!");
+                LoadVoterData();
+                document.getElementById("admissionId").value = "";
+                document.getElementById("name").value = "";
+                document.getElementById("email").value = "";
+                document.getElementById("phone").value = "";
+                document.getElementById("batch").value = "";
+                document.getElementById("year").value = "";
+                document.getElementById("department").value = "";
+            })
+            .catch((error) => {
+                alert("❌ Error storing data: " + error);
+            });
+        }
+
+        // ✅ Function to Load Voter Data and Display in Table
+        function LoadVoterData() {
+            const tableBody = document.getElementById("voterTable");
+            tableBody.innerHTML = ""; // Clear previous data
+
+            get(ref(db, "voters/")).then((snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        let voter = childSnapshot.val();
+                        let row = document.createElement("tr");
+
+                        row.innerHTML = `
+                            <td>${voter.AdmissionNo}</td>
+                            <td>${voter.Name}</td>
+                            <td>${voter.Email}</td>
+                            <td>${voter.Phone}</td>
+                            <td>${voter.Batch}</td>
+                            <td>${voter.Year}</td>
+                            <td>${voter.Department}</td>
+                            <td><button class="remove-btn" onclick="DeleteVoter('${voter.AdmissionNo}', this)">Remove</button></td>
+                        `;
+
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    console.log("ℹ️ No voters found in database.");
+                }
+            }).catch((error) => {
+                console.error("❌ Error fetching voter data:", error);
+            });
+        }
+
+        // ✅ Function to Delete a Voter
+        window.DeleteVoter = function (admissionId, button) {
+            remove(ref(db, "voters/" + admissionId))
+                .then(() => {
+                    alert("🗑️ Voter removed successfully!");
+                    let row = button.closest("tr");
+                    row.remove(); // Remove row from table
+                })
+                .catch((error) => {
+                    console.error("❌ Error deleting voter:", error);
+                });
+        };
+
+        // ✅ Attach event listener when the DOM loads
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("addVoterBtn").addEventListener("click", InsertData);
+            LoadVoterData();
+        });
+    </script>
+</body>
+</html>

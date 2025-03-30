@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbXNEje3_zNs63ydslxfVx1FKt3S786B4",
+            authDomain: "main-27d80.firebaseapp.com",
+            databaseURL: "https://main-27d80-default-rtdb.firebaseio.com",
+            projectId: "main-27d80",
+            storageBucket: "main-27d80.appspot.com",
+            messagingSenderId: "1001747344110",
+            appId: "1:1001747344110:web:de9f44c0d7159875e0e1ff"
+        };
+
+
+
+
+
+
+
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+
+        async function fetchResultsDate() {
+            try {
+                const resultDateRef = ref(db, "settings/resultDate");
+                const snapshot = await get(resultDateRef);
+                return snapshot.exists() ? new Date(snapshot.val()) : null;
+            } catch (error) {
+                console.error("Error fetching result date:", error);
+                return null;
+            }
+        }
+
+
+  async function fetchElectionResults() {
+            try {
+                const candidatesRef = ref(db, "candidates");
+                const votesRef = ref(db, "votes");
+
+
+                const [candidatesSnapshot, votesSnapshot] = await Promise.all([
+                    get(candidatesRef),
+                    get(votesRef)
+                ]);
+
+
+
+
+                if (!candidatesSnapshot.exists() || !votesSnapshot.exists()) return [];
+
+
+                const candidatesData = candidatesSnapshot.val();
+                const votes = votesSnapshot.val();
+
+
+                const positionsOrder = [];
+                const voteCounts = {};
+
+
+                // Ensure positions are in order from the candidates database
+                Object.values(candidatesData).forEach(candidate => {
+                    if (!positionsOrder.includes(candidate.position)) {
+                        positionsOrder.push(candidate.position);
+                    }
+                });
+
+
+
+
+                // Count votes per candidate under each position
+                Object.values(votes).forEach(userVotes => {
+                    Object.entries(userVotes).forEach(([position, vote]) => {
+                        const { candidateName } = vote;
+
+
+
+
+                        if (!voteCounts[position]) voteCounts[position] = {};
+                        voteCounts[position][candidateName] = (voteCounts[position][candidateName] || 0) + 1;
+                    });
+                });
+
+
+
+
+                // Get the winner per position
+                const results = positionsOrder.map(position => {
+                    if (!voteCounts[position]) return { post: position, winner: "No Votes", votes: 0 };
+
+
+
+
+                    const [winner, maxVotes] = Object.entries(voteCounts[position]).reduce((max, curr) =>
+                        curr[1] > max[1] ? curr : max
+                    );
+
+
+                    return {
+                        post: position,
+                        winner: winner,
+                        votes: maxVotes
+                    };
+                });
+
+
+                // Ensure "Chairman" is displayed first, followed by "Vice Chairperson"
+                results.sort((a, b) => {
+                    const order = ["Chairman", "Vice Chairperson"];
+                    return (order.indexOf(a.post) !== -1 ? order.indexOf(a.post) : 2) -
+                           (order.indexOf(b.post) !== -1 ? order.indexOf(b.post) : 2);
+                });
+
+
+
+
+                return results;
+            } catch (error) {
+                console.error("Error fetching election results:", error);
+                return [];
+            }
+        }
+
+
+
+
+        async function displayResults() {
+            const resultDate = await fetchResultsDate();
+            const currentDate = new Date();
+            const contentDiv = document.getElementById('content');
+
+
+            if (!resultDate) {
+                contentDiv.innerHTML = "<h1>Error fetching result date.</h1>";
+                return;
+            }
+
+
+
+
+            if (currentDate >= resultDate) {
+                const electionResults = await fetchElectionResults();
+                const resultsContainer = document.createElement('div');
+                resultsContainer.className = 'results-container';
+                resultsContainer.innerHTML = `
+                    <h2>Election Results</h2>
+                    ${electionResults.map(result => `
+                        <div class="result-card">
+                            <h3>${result.post}</h3>
+                            <p><strong>Winner:</strong> ${result.winner}</p>
+                            <p><strong>Votes:</strong> ${result.votes}</p>
+                        </div>
+                    `).join('')}
+                `;
+                contentDiv.appendChild(resultsContainer);
+            } else {
+                contentDiv.innerHTML = `
+                    <div class="restricted-message">
+                        <h1>Results Not Published</h1>
+                        <p>The election results will be available on ${resultDate.toDateString()}.</p>
+                    </div>
+                `;
+            }
+        }
+
+
+        document.addEventListener("DOMContentLoaded", displayResults);
+
+
+
+
+        async function fetchData(path) {
+            const dataRef = ref(db, path);
+            const snapshot = await get(dataRef);
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+
+
+
+
+        async function drawGraphs() {
+            const votes = await fetchData("votes");
+            const candidates = await fetchData("candidates");
+            const voters = await fetchData("voters");
+
+
+
+
+            if (!votes || !candidates || !voters) {
+                console.error("Error fetching data");
+                return;
+            }
+
+
+
+
+            // Department-wise Voting Data
+            const deptVotes = {};
+            Object.entries(votes).forEach(([voterId, vote]) => {
+                const dept = voters[voterId]?.Department || 'Unknown';
+                deptVotes[dept] = (deptVotes[dept] || 0) + 1;
+            });
+
+
+
+
+            new Chart(document.getElementById('deptChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(deptVotes),
+                    datasets: [{
+                        label: 'Votes per Department',
+                        data: Object.values(deptVotes),
+                        backgroundColor: '#007BFF',
+                        borderColor: '#0056b3',
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+
+
+
+            // Candidate Votes Data
+            const candidateVotes = {};
+            Object.values(votes).forEach(vote => {
+                Object.entries(vote).forEach(([position, candidate]) => {
+                    const name = candidate.candidateName;
+                    candidateVotes[position] = candidateVotes[position] || {};
+                    candidateVotes[position][name] = (candidateVotes[position][name] || 0) + 1;
+                });
+            });
+
+
+
+
+            const positionLabels = Object.keys(candidateVotes);
+            const positionData = positionLabels.map(position => {
+                const maxCandidate = Object.entries(candidateVotes[position]).reduce((a, b) => (a[1] > b[1] ? a : b));
+                return { label: maxCandidate[0], data: maxCandidate[1] };
+            });
+
+
+
+
+            new Chart(document.getElementById('candidateChart'), {
+                type: 'bar',
+                data: {
+                    labels: positionLabels,
+                    datasets: [{
+                        label: 'Max Votes per Candidate',
+                        data: positionData.map(d => d.data),
+                        backgroundColor: '#28a745',
+                        borderColor: '#1e7e34',
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+
+
+
+        document.addEventListener("DOMContentLoaded", drawGraphs);
+    </script>
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #3a4c6e);
+            color: #fff;
+            display: flex;
+            height: 800px;
+            align-items:center;
+            padding-left: 350px;
+   
+           
+        }
+        .results-container {
+            width: 300px;
+            height: 800px;
+            background: #ffffff;
+            color: #222;
+            max-width: 800px;
+            padding:30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+       #content{
+            padding-top:200px;
+            padding-left: 0px;
+            padding-right: 30px;
+        }
+
+
+        h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 8px;
+            font-size: 26px;
+        }
+     
+        .result-card {
+            background: #e3e6f3;
+            color: #222;
+            border-left: 5px solid #007BFF;
+            padding: 20px;
+            margin: 12px 0;
+            border-radius: 8px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+
+
+        .result-card:hover {
+            transform: translateY(-5px);
+       
+        }
+        .restricted-message {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            color: #fff;
+        }
+
+
+        .restricted-message h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+
+
+        .restricted-message p {
+            font-size: 16px;
+        }
+       
+        .navbar {
+            background: linear-gradient(135deg, #302b69, #082857);
+            width: 100%;
+            padding: 1rem 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+
+        .navbar .nav-links a:hover {
+            color: #a8dadc;
+        }
+        canvas {
+            background: #fcf8f8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="index.html" class="link">HOME</a>
+            <a href="adminlogin.html" class="link">ADMIN</a>
+            <a href="login.html" class="link">VOTE</a>
+            <a href="result.html" class="link">RESULT</a>
+            <a href="about.html" class="link">ABOUT US</a>
+        </div>
+    </div>
+    <div id="content">
+        <!-- Content will be rendered dynamically here -->
+    </div>
+    <section>
+        <canvas id="deptChart" width="400" height="200"></canvas>
+        <canvas id="candidateChart" width="400" height="200"></canvas>
+    </section>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
